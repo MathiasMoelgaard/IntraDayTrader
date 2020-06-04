@@ -105,7 +105,7 @@ class tcn_agent(agent_thread):
             pass
         elif len(self.market_history) == self.training_data + offset:
             self.train()
-        if len(self.market_history) > self.training_data + offset:
+        if len(self.market_history) > self.training_data + offset + self.moments:
             predicted_value, real_current_value = self.run_model()
             print("Correct guess chance is: ", self.correct_guess*100/(self.time_counter - self.training_data - offset), "%")
             if not self.holding and predicted_value[0] > real_current_value[0]:#(predicted_value[0] > 0 and predicted_value[1] > 0):
@@ -266,6 +266,21 @@ class tcn_agent(agent_thread):
 
         return malast7, malast21#, explast7, explast21)
 
+    def get_technical_indicators_(self, i, input):
+        if len(input) >= 8 and i >= 8:
+            last7 = input[i-8:i-1]
+        else:
+            last7 = input[:]
+        if len(input) >= 28 and i >= 28:
+            last21 = input[i-28:i-1]
+        else:
+            last21 = input[:]
+        last7 = [i[0] for i in last7]
+        last21 = [i[0] for i in last21]
+        malast7 = np.mean(last7)
+        malast21 = np.mean(last21)
+
+        return malast7, malast21
 
     def split_data(self, input, moments, lookahead = 1):
         # Split data into groups for training and testing
@@ -387,8 +402,8 @@ class tcn_agent(agent_thread):
             for i in range(len(input)):
                 if self.arima_on == True:
                     input[i].append(self.arima_feature(len(self.arima) - len(input) + i))
-                input[i].append(self.get_technical_indicators(len(self.arima) - len(input) + i)[0])
-                input[i].append(self.get_technical_indicators(len(self.arima) - len(input) + i)[1])
+                input[i].append(self.get_technical_indicators_(len(self.arima) - len(input) + i, input)[0])
+                input[i].append(self.get_technical_indicators_(len(self.arima) - len(input) + i, input)[1])
                 self.features.append(input[i])
 
     def train(self, data_path = None):
