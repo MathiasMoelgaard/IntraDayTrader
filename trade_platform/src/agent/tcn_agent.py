@@ -92,6 +92,7 @@ class tcn_agent(agent_thread):
         self.sell_points = []
         self.networth_points = []
         self.training_data = moments*trainset #Amount of data to set aside for training when running on same data set
+        self.train_dif = 0
 
     def _find_decision(self):
         #Right now these below if statement are for training and testing on the same data set with training on
@@ -230,7 +231,7 @@ class tcn_agent(agent_thread):
             o = Dense(1, activation='linear')(o)
             self.save = ModelCheckpoint('./model4.h5', save_best_only=True, monitor='val_loss', mode='min')
         self.m = Model(inputs=i, outputs=o)
-        self.m.compile(optimizer='adam', loss='mse') #optimizer and loss can be changed to what we want
+        self.m.compile(optimizer='adam', loss=custom_loss) #optimizer and loss can be changed to what we want
         self.stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
         #########################################################################
 
@@ -377,7 +378,7 @@ class tcn_agent(agent_thread):
         return data
 
     def prepare_data(self):
-        difference = len(self.features) - len(self.market_history)
+        difference = len(self.features) - len(self.market_history) - self.train_dif
         if self.arima_on:
             difference +=50
         if difference < 0:
@@ -392,6 +393,7 @@ class tcn_agent(agent_thread):
                 self.features.append(input[i])
 
     def prepare_data_(self, input):
+        self.train_dif = len(input)
         difference = len(self.features) - len(input)
         if self.arima_on:
             difference +=50
@@ -429,7 +431,6 @@ class tcn_agent(agent_thread):
             #inputs = self.get_log_percentages(-self.moments)
         #else:
         inputs = self.market_history[-self.moments:]
-
         x, y = self.split_data(inputs, self.moments)
         #print(x)
         #print(y)
