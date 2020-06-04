@@ -106,9 +106,9 @@ class tcn_agent(agent_thread):
         elif len(self.market_history) == self.training_data + offset:
             self.train()
         if len(self.market_history) > self.training_data + offset + self.moments:
-            predicted_value, real_current_value = self.run_model()
-            print("Correct guess chance is: ", self.correct_guess*100/(self.time_counter - self.training_data - offset), "%")
-            if not self.holding and predicted_value[0] > real_current_value[0]:#(predicted_value[0] > 0 and predicted_value[1] > 0):
+            predicted_value = self.run_model()
+            print("Correct guess chance is: ", self.correct_guess*100/(self.time_counter - self.training_data - offset - self.moments), "%")
+            if not self.holding and predicted_value[0] > 0:#(predicted_value[0] > 0 and predicted_value[1] > 0):
                 self.amount = 100 #amount to buy is set to fix for now but can be changed
                 #self.amount = 1000 * (predicted_value[0] - real_current_value[0]) use this for varing amount or make your own
                 if self.amount < 0:
@@ -132,7 +132,7 @@ class tcn_agent(agent_thread):
                 self.buy_points.append([self.time_counter-1, self.buy_in_price])
                 self.networth -= self.buy_in_price * self.amount
                 print("buy  at time " + str(self.time_counter) + "\t price : " + str(self.buy_in_price))
-            elif self.holding and predicted_value[0] < real_current_value[0]:#(predicted_value[0] < 0 or predicted_value[1] < 0):
+            elif self.holding and predicted_value[0] < 0:#(predicted_value[0] < 0 or predicted_value[1] < 0):
                 self.act = action.SELL
                 ###Sergei's algorithm
                 if (self.market_history[self.time_counter - 3].close <= self.market_history[self.time_counter - 3].open
@@ -295,7 +295,7 @@ class tcn_agent(agent_thread):
         x = np.array([])
         y = np.array([])
         #Normalize data
-        input = self.normalization(input, 'default')
+        input = self.normalization(input, 'custom')
         for i in range(input.shape[0] - moments+1):
             x_values = np.array(input[i:moments + i - lookahead])
             y_values = np.array(input[i+moments-lookahead:i+moments][0][0])
@@ -352,7 +352,7 @@ class tcn_agent(agent_thread):
                             inner_data.append(np.log(value/data_pt[0]))
                     else:
                         if (j < 1):
-                            inner_data.append(np.log(value / data[i - 1][1]))
+                            inner_data.append(np.log(value / data[i - 1][0]))
                         else:
                             inner_data.append(np.log(value/ (data[i - 1][0])))
                 normalized_data.append(inner_data)
@@ -366,12 +366,12 @@ class tcn_agent(agent_thread):
                         if (j < 1):
                             inner_data.append((value / value)-1)
                         else:
-                            inner_data.append((value / data_pt[j])-1)
+                            inner_data.append((value / data_pt[0])-1)
                     else:
                         if (j < 1):
-                            inner_data.append((value / data[i - 1][j])-1)
+                            inner_data.append((value / data[i - 1][0])-1)
                         else:
-                            inner_data.append((value / data[i-1][j])-1)#data[i - 1][0])-1)
+                            inner_data.append((value / data[i-1][0])-1)
                 normalized_data.append(inner_data)
             return np.array(normalized_data)
         return data
@@ -436,7 +436,7 @@ class tcn_agent(agent_thread):
         y_hat = self.m.predict(x)
         print("Predicting next price to be: ", y_hat[0][0])
         print("Real next price was: ", y)
-        if ((y-x[0][-1][0]) * (y_hat[0][0]-x[0][-1][0]) > 0): #checks if agent guessed right on opening going up or down
+        if (y * y_hat[0][0] > 0): #checks if agent guessed right on opening going up or down
             self.correct_guess +=1
         y_normal = 0
         if self.percentage != []:
@@ -445,7 +445,7 @@ class tcn_agent(agent_thread):
             y_normal = 10*(y_hat[0][0]/self.market_history[-2].price)*self.market_history[-2].price
         #print("Converted back predicted value is ", y_normal) #To be changed to function to account for different normalized data
         #print("Read normal value is ", self.market_history[-1].price)
-        return y_hat[0], x[0][-1]
+        return y_hat[0]
 
     def update_market_history(self, data):
         # undate for 1 unit of time
