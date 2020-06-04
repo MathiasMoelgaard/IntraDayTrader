@@ -7,7 +7,7 @@ if __name__ == "__main__":
     t = trade_platform(length=5000, data_path='data/US1.ABT_190504_200519.txt', enable_plot=False,random=False, type = "minute")
     # when inport csv or other data file, be sure to remove the headers.
 
-    trained_agent = tcn_agent(trainset = 200, arima = False, model='1', moments=33)
+    trained_agent = tcn_agent(trainset = 20, arima = False, model='1', moments=17)
     #trained_agent.train('data/US1.ATVI_200505_200507.txt')
     t.add_agent(trained_agent)
     t.start()
