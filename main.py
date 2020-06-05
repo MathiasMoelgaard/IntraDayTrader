@@ -8,7 +8,7 @@ if __name__ == "__main__":
     # when inport csv or other data file, be sure to remove the headers.
 
     trained_agent = tcn_agent(trainset = 0, arima = False, model='2', moments=17)
-    trained_agent.train('data/US1.ATVI_200505_200507.txt')
+    trained_agent.train('data/USDJPY.csv')
     t.add_agent(trained_agent)
     t.start()
 

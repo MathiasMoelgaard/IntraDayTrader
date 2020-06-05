@@ -424,7 +424,7 @@ class tcn_agent(agent_thread):
             else:
                 inputs = self.market_history[:]
         x, y = self.split_data(inputs, self.moments)
-        self.m.fit(x, y, epochs=500, validation_split=0.1, callbacks=[self.stop, self.save])
+        self.m.fit(x, y, epochs=500, validation_split=0.1, callbacks=[self.stop])#, self.save])#add this if you want to try to get save to work
         
     def run_model(self):
         #if self.log_percentage != []:
