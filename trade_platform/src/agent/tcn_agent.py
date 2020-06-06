@@ -77,7 +77,11 @@ class tcn_agent(agent_thread):
             self.input_dim += 1
         self.built = False
         if loadModel:
-            self.m = load_model('./model%s.h5'%model)
+            self.m = load_model('./model%s.h5'%model, custom_objects={'TCN': TCN})
+            self.stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
+            self.m.compile(optimizer='adam', loss='mse')
+            if model == '1':
+                self.save = ModelCheckpoint('./model1.h5', save_best_only=True, monitor='val_loss', mode='min')
         else:
             self.model(model) #Compile model
         self.training = True
@@ -408,7 +412,7 @@ class tcn_agent(agent_thread):
                 inputs = self.market_history[:]
         x, y = self.split_data(inputs, self.moments)
         self.m.fit(x, y, epochs=500, validation_split=0.1, callbacks=[self.stop, self.save])
-        
+
     def run_model(self):
         #if self.log_percentage != []:
             #inputs = self.get_log_percentages(-self.moments)
