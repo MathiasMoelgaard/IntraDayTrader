@@ -22,10 +22,10 @@ if __name__ == "__main__":
         predict, actual = Tcn.predict()
 
         #graphs predicted percentage change over 100 minutes
-        for i in [100,500,1000]:
-            predict1 = 10** predict[:i]
-            actual1 = 10** actual[:i]
-            for i in range(len(predict) - 1):
+        for j in [100,500,1000]:
+            predict1 = 10** predict[:j]
+            actual1 = 10** actual[:j]
+            for i in range(j - 1):
                     predict1[i+1] = predict1[i+1] * predict1[i]
                     actual1[i+1] = actual1[i+1] * actual1[i]
 
