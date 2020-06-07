@@ -70,6 +70,7 @@ class tcn_agent(agent_thread):
         if reproduceable:
             npy.random.seed(2020)
         agent_thread.__init__(self)
+        self.train_dif = 0
         self.moments = moments #Number of moments looked back to decide next value
         self.holding_time = 0
         self.batch_size = batch_size
@@ -390,7 +391,8 @@ class tcn_agent(agent_thread):
         return data
 
     def prepare_data(self):
-        difference = len(self.features) - len(self.market_history)
+        self.train_dif = len(input)
+        difference = len(self.features) - len(self.market_history) - self.train_dif
         if self.arima_on:
             difference +=50
         if difference < 0:
