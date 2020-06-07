@@ -121,7 +121,7 @@ class tcn_agent(agent_thread):
         if len(self.market_history) > self.training_data + offset + self.moments:
             predicted_value, real_current_value = self.run_model()
             print("Correct guess chance is: ", self.correct_guess*100/(self.time_counter - self.training_data - offset), "%")
-            if not self.holding and predicted_value[0] > real_current_value[0]:#(predicted_value[0] > 0 and predicted_value[1] > 0):
+            if not self.holding and predicted_value[0] > real_current_value[0]: #Change to real_current_value[0] if using scaler
                 self.amount = 100 #amount to buy is set to fix for now but can be changed
                 #self.amount = 1000 * (predicted_value[0] - real_current_value[0]) use this for varing amount or make your own
                 if self.amount < 0:
