@@ -66,7 +66,7 @@ class tcn_agent(agent_thread):
     #t.start()
     #Can change perameters, just need to set trainset to 0 when running on another dataset
 
-    def __init__(self, moments = 17, batch_size = None, input_dim = 6, model = '1', trainset = 100, arima = True, loadModel = False, reproduceable = False):
+    def __init__(self, moments = 17, batch_size = None, input_dim = 6, model = '1', trainset = 100, arima = True, loadModel = False, reproduceable = False, norm = "custom"):
         if reproduceable:
             npy.random.seed(2020)
         agent_thread.__init__(self)
@@ -83,7 +83,7 @@ class tcn_agent(agent_thread):
             self.stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
             self.m.compile(optimizer='adam', loss='mse')
             if model == '1':
-                self.save = ModelCheckpoint('./model1.h5', save_best_only=True, monitor='val_loss', mode='min')
+                self.save = ModelCheckpoint(f'./model1{norm}.h5', save_best_only=True, monitor='val_loss', mode='min')
             elif model == '2':
                 self.save = ModelCheckpoint('./model2.h5', save_best_only=True, monitor='val_loss', mode='min')
             elif model == '3':
@@ -199,7 +199,7 @@ class tcn_agent(agent_thread):
                      kernel_size=2)(x2)
             x = add([x1, x2])
             o = Dense(1, activation='linear')(x)
-            self.save = ModelCheckpoint('./model1.h5', save_best_only=True, monitor='val_loss', mode='min')
+            self.save = ModelCheckpoint('./model1.h5', save_best_only=False, monitor='val_loss', mode='min')
 
         elif model == '2':
             x1 = TCN(return_sequences=True, nb_filters=(self.moments - 1) * 2, dilations=[1, 2, 4], nb_stacks=2,
@@ -295,6 +295,7 @@ class tcn_agent(agent_thread):
         return malast7, malast21
 
     def split_data(self, input, moments, lookahead = 1):
+        print("splitting data")
         # Split data into groups for training and testing
         size = len(input)
         if self.training_data == 0 and len(self.features) == 0:

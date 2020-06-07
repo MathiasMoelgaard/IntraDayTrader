@@ -89,7 +89,7 @@ class trade_platform(Thread):
                     self.market.set_next_time_status(True)
 
                 # registrate agents' transaction to ACB
-                print(cur_time,ag.holding,ag.act)
+                # print(cur_time,ag.holding,ag.act)
                 for ag in self.acb:
                     if ag.act == action.BUY:
                         if (market_data.high and market_data.low and ag.offer_price) != None and \
