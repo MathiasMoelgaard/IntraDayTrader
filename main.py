@@ -18,7 +18,7 @@ if __name__ == "__main__":
 # for example, the order of your CSV is different from mrkt_data
 # first define a function
 def mrkt_data_example(self, args,time = 0 ):
-    self.price = args[0]
+    self.price = args[0]#hi
     self.spacial_data1 = args[1]
     self.spacial_data2 = args[2]
     # ......
