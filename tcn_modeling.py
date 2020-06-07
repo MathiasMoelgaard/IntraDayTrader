@@ -57,6 +57,19 @@ class tcn():
                 x = add([x1, x2])
                 o = Dense(1, activation='linear')(x)
 
+            elif model == 3:
+                x = TCN(return_sequences=True, nb_filters=32, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.3,
+                     kernel_size=4)(i)
+                x1 = TCN(return_sequences=True, nb_filters = 16, dilations = [1, 2, 4, 8], nb_stacks = 2, dropout_rate=.3, kernel_size=4)(x)
+                x2 = LSTM(32, return_sequences=True, dropout=.3)(i)
+                x2 = LSTM(16, return_sequences=True, dropout=.3)(x2)
+                x = add([x1, x2])
+                x = Dense(8, activation='linear')(x)
+                x = TCN(return_sequences=True, nb_filters=4, dilations=[1, 2, 4], nb_stacks=1, dropout_rate=.3,
+                        kernel_size=2, activation=wave_net_activation)(x)
+                x = concatenate([GlobalMaxPooling1D()(x), GlobalAveragePooling1D()(x)])
+                o = Dense(1, activation='linear')(x)
+
             self.m = Model(inputs=i, outputs=o)
 
         else:
