@@ -120,7 +120,7 @@ class tcn_agent(agent_thread):
             self.train()
         if len(self.market_history) > self.training_data + offset + self.moments:
             predicted_value, real_current_value = self.run_model()
-            print("Correct guess chance is: ", self.correct_guess*100/(self.time_counter - self.training_data - offset), "%")
+            print("Correct guess chance is: ", self.correct_guess*100/(self.time_counter - self.training_data - offset - self.moments), "%")
             if not self.holding and predicted_value[0] > 0: #Change to real_current_value[0] if using scaler
                 self.amount = 100 #amount to buy is set to fix for now but can be changed
                 #self.amount = 1000 * (predicted_value[0] - real_current_value[0]) use this for varing amount or make your own
@@ -194,10 +194,10 @@ class tcn_agent(agent_thread):
             #and increased networth, slight loss of income due to sergei's algoritm
             #Can try with activation = wave_net_activation
             x1 = TCN(return_sequences=False, nb_filters=(self.moments-1)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.3,
-                     kernel_size=2)(i)
+                     kernel_size=4)(i)
             x2 = Lambda(lambda z: backend.reverse(z, axes=-1))(i)
-            x2 = TCN(return_sequences=False, nb_filters=(self.moments-1)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.1,
-                     kernel_size=2)(x2)
+            x2 = TCN(return_sequences=False, nb_filters=(self.moments-1)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.3,
+                     kernel_size=4)(x2)
             x = add([x1, x2])
             o = Dense(1, activation='linear')(x)
             self.save = ModelCheckpoint('./model1.h5', save_best_only=False, monitor='val_loss', mode='min')
