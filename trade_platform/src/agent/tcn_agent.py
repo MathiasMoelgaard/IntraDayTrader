@@ -194,10 +194,10 @@ class tcn_agent(agent_thread):
             #and increased networth, slight loss of income due to sergei's algoritm
             #Can try with activation = wave_net_activation
             x1 = TCN(return_sequences=False, nb_filters=(self.moments-1)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.3,
-                     kernel_size=4)(i)
+                     kernel_size=2)(i)
             x2 = Lambda(lambda z: backend.reverse(z, axes=-1))(i)
-            x2 = TCN(return_sequences=False, nb_filters=(self.moments-1)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.3,
-                     kernel_size=4)(x2)
+            x2 = TCN(return_sequences=False, nb_filters=(self.moments-1)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.1,
+                     kernel_size=2)(x2)
             x = add([x1, x2])
             o = Dense(1, activation='linear')(x)
             self.save = ModelCheckpoint('./model1.h5', save_best_only=False, monitor='val_loss', mode='min')
@@ -244,7 +244,7 @@ class tcn_agent(agent_thread):
             self.save = ModelCheckpoint('./model4.h5', save_best_only=True, monitor='val_loss', mode='min')
         self.m = Model(inputs=i, outputs=o)
         self.m.compile(optimizer='adam', loss=custom_loss) #optimizer and loss can be changed to what we want
-        self.stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
+        self.stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
         #########################################################################
 
     def arima_feature(self, i):
