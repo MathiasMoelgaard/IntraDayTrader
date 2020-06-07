@@ -18,13 +18,13 @@ from tcn import TCN
 
 class tcn():
 
-    def __init__(self, moments, data_path = None, batch_size = None, input_dims = 6, trainset = 100, loadModel = None, reporducability = False):
+    def __init__(self, moments, model = 1, data_path = None, batch_size = None, input_dims = 6, trainset = 100, loadModel = None, reporducability = False):
         if reporducability:
             np.random.seed(2020)
 
         self.batch_size = batch_size
 
-        save = f"moments_{moments}+batch_size{batch_size}.h5"
+        save = f"model_{model}+moments_{moments}+batch_size{batch_size}.h5"
         self.save = ModelCheckpoint(save, save_best_only=True, monitor='val_loss', mode='min')
         self.moments = moments;
         self.stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
@@ -33,14 +33,29 @@ class tcn():
         if loadModel == None:
             '''make the model here'''
             i = Input(batch_shape=(self.batch_size, self.moments, 4))
+            if model == 1:
+                x1 = TCN(return_sequences=False, nb_filters=(self.moments)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.3,
+                         kernel_size=2)(i)
+                x2 = Lambda(lambda z: backend.reverse(z, axes=-1))(i)
+                x2 = TCN(return_sequences=False, nb_filters=(self.moments)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.1,
+                         kernel_size=2)(x2)
+                x = add([x1, x2])
+                o = Dense(1, activation='linear')(x)
 
-            x1 = TCN(return_sequences=False, nb_filters=(self.moments)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.3,
+            elif model == 2:
+                x1 = TCN(return_sequences=True, nb_filters=(self.moments) * 2, dilations=[1, 2, 4], nb_stacks=2,
+                     dropout_rate=.3,
                      kernel_size=2)(i)
-            x2 = Lambda(lambda z: backend.reverse(z, axes=-1))(i)
-            x2 = TCN(return_sequences=False, nb_filters=(self.moments)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.1,
-                     kernel_size=2)(x2)
-            x = add([x1, x2])
-            o = Dense(1, activation='linear')(x)
+                x2 = Lambda(lambda z: backend.reverse(z, axes=-1))(i)
+                x2 = TCN(return_sequences=True, nb_filters=(self.moments) * 2, dilations=[1, 2, 4], nb_stacks=2,
+                         dropout_rate=.1,
+                         kernel_size=2)(x2)
+                x = add([x1, x2])
+                x1 = LSTM(5, return_sequences=False, dropout=.3)(x)
+                x2 = Lambda(lambda z: backend.reverse(z, axes=-1))(x)
+                x2 = LSTM(5, return_sequences=False, dropout=.3)(x2)
+                x = add([x1, x2])
+                o = Dense(1, activation='linear')(x)
 
             self.m = Model(inputs=i, outputs=o)
 
