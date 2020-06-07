@@ -80,7 +80,7 @@ class tcn_agent(agent_thread):
             self.input_dim += 1
         self.built = False
         if loadModel:
-            self.m = load_model('./model%s.h5'%model, custom_objects={'TCN': TCN})
+            self.m = load_model(loadModel, custom_objects={'TCN': TCN})
             self.stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
             self.m.compile(optimizer='adam', loss='mse')
             if model == '1':
@@ -391,7 +391,6 @@ class tcn_agent(agent_thread):
         return data
 
     def prepare_data(self):
-        self.train_dif = len(input)
         difference = len(self.features) - len(self.market_history) - self.train_dif
         if self.arima_on:
             difference +=50
