@@ -216,7 +216,7 @@ class tcn_agent(agent_thread):
             x2 = LSTM(5, return_sequences=False, dropout=.3)(x2)
             x = add([x1, x2])
             o = Dense(1, activation='linear')(x)
-            self.save = ModelCheckpoint('./model2.h5', save_best_only=True, monitor='val_accuracy', mode='max')
+            self.save = ModelCheckpoint('./model2.h5', save_best_only=True, monitor='val_loss', mode='min')
 
         elif model == '3':
             #Complex model to test and change, probably poorer results due to overtraining
@@ -243,7 +243,7 @@ class tcn_agent(agent_thread):
             o = Dense(1, activation='linear')(o)
             self.save = ModelCheckpoint('./model4.h5', save_best_only=True, monitor='val_loss', mode='min')
         self.m = Model(inputs=i, outputs=o)
-        self.m.compile(optimizer='adam', loss='mse') #optimizer and loss can be changed to what we want
+        self.m.compile(optimizer='adam', loss=custom_loss) #optimizer and loss can be changed to what we want
         self.stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
         #########################################################################
 
@@ -309,7 +309,7 @@ class tcn_agent(agent_thread):
         x = np.array([])
         y = np.array([])
         #Normalize data
-        input = self.normalization(input, 'default')
+        input = self.normalization(input, 'custom')
         for i in range(input.shape[0] - moments+1):
             x_values = np.array(input[i:moments + i - lookahead])
             y_values = np.array(input[i+moments-lookahead:i+moments][0][0])
@@ -391,7 +391,6 @@ class tcn_agent(agent_thread):
         return data
 
     def prepare_data(self):
-        self.train_dif = len(input)
         difference = len(self.features) - len(self.market_history) - self.train_dif
         if self.arima_on:
             difference +=50
@@ -407,6 +406,7 @@ class tcn_agent(agent_thread):
                 self.features.append(input[i])
 
     def prepare_data_(self, input):
+        self.train_dif = len(input)
         difference = len(self.features) - len(input)
         if self.arima_on:
             difference +=50
