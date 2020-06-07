@@ -121,7 +121,7 @@ class tcn_agent(agent_thread):
         if len(self.market_history) > self.training_data + offset + self.moments:
             predicted_value, real_current_value = self.run_model()
             print("Correct guess chance is: ", self.correct_guess*100/(self.time_counter - self.training_data - offset), "%")
-            if not self.holding and predicted_value[0] > real_current_value[0]: #Change to real_current_value[0] if using scaler
+            if not self.holding and predicted_value[0] > 0: #Change to real_current_value[0] if using scaler
                 self.amount = 100 #amount to buy is set to fix for now but can be changed
                 #self.amount = 1000 * (predicted_value[0] - real_current_value[0]) use this for varing amount or make your own
                 if self.amount < 0:
@@ -132,31 +132,31 @@ class tcn_agent(agent_thread):
                 ###Sergei's algorithm
                 # looking at self.time_counter-2 so we can check the real value while guessing the real value
                 # as well as be able to use high and low of current market point for Sergei's algorithm
-                if (self.market_history[self.time_counter - 3].close >= self.market_history[self.time_counter - 3].open
-                        and self.market_history[self.time_counter - 2].close <= self.market_history[self.time_counter - 2].open
-                        and (self.market_history[self.time_counter - 3].high >= self.market_history[self.time_counter - 1].low
-                        and self.market_history[self.time_counter - 3].high <= self.market_history[self.time_counter - 1].high)):
-                    self.buy_in_price = self.market_history[self.time_counter - 3].high
-                    print("Used Sergei's algorithm and gained/lost ", self.market_history[self.time_counter - 2].price - self.buy_in_price, " per share")
-                    self.sergei += (self.market_history[self.time_counter - 2].price - self.buy_in_price) * self.amount
-                else:
-                    self.buy_in_price = self.market_history[self.time_counter - 2].price #base price
+                #if (self.market_history[self.time_counter - 3].close >= self.market_history[self.time_counter - 3].open
+                #        and self.market_history[self.time_counter - 2].close <= self.market_history[self.time_counter - 2].open
+                #        and (self.market_history[self.time_counter - 3].high >= self.market_history[self.time_counter - 1].low
+                #        and self.market_history[self.time_counter - 3].high <= self.market_history[self.time_counter - 1].high)):
+                #    self.buy_in_price = self.market_history[self.time_counter - 3].high
+                #    print("Used Sergei's algorithm and gained/lost ", self.market_history[self.time_counter - 2].price - self.buy_in_price, " per share")
+                #    self.sergei += (self.market_history[self.time_counter - 2].price - self.buy_in_price) * self.amount
+                #else:
+                self.buy_in_price = self.market_history[self.time_counter - 2].price #base price
                 #print(self.buy_in_price)
                 self.buy_points.append([self.time_counter-1, self.buy_in_price])
                 self.networth -= self.buy_in_price * self.amount
                 print("buy  at time " + str(self.time_counter) + "\t price : " + str(self.buy_in_price))
-            elif self.holding and predicted_value[0] < real_current_value[0]:#(predicted_value[0] < 0 or predicted_value[1] < 0):
+            elif self.holding and predicted_value[0] < 0:#Change to real_current_value[0] if using scaler
                 self.act = action.SELL
                 ###Sergei's algorithm
-                if (self.market_history[self.time_counter - 3].close <= self.market_history[self.time_counter - 3].open
-                        and self.market_history[self.time_counter - 2].close >= self.market_history[self.time_counter - 2].open
-                        and (self.market_history[self.time_counter - 3].low >= self.market_history[self.time_counter - 1].low
-                        and self.market_history[self.time_counter - 3].low <= self.market_history[self.time_counter - 1].high)):
-                    self.sell_price = self.market_history[self.time_counter - 3].low
-                    print("Used Sergei's algorithm and gained/lost ", self.buy_in_price - self.market_history[self.time_counter - 2].price, " per share")
-                    self.sergei += (self.buy_in_price - self.market_history[self.time_counter - 2].price) * self.amount
-                else:
-                    self.sell_price = self.market_history[self.time_counter - 2].price
+                #if (self.market_history[self.time_counter - 3].close <= self.market_history[self.time_counter - 3].open
+                #        and self.market_history[self.time_counter - 2].close >= self.market_history[self.time_counter - 2].open
+                #        and (self.market_history[self.time_counter - 3].low >= self.market_history[self.time_counter - 1].low
+                #        and self.market_history[self.time_counter - 3].low <= self.market_history[self.time_counter - 1].high)):
+                #    self.sell_price = self.market_history[self.time_counter - 3].low
+                #    print("Used Sergei's algorithm and gained/lost ", self.buy_in_price - self.market_history[self.time_counter - 2].price, " per share")
+                #    self.sergei += (self.buy_in_price - self.market_history[self.time_counter - 2].price) * self.amount
+                #else:
+                self.sell_price = self.market_history[self.time_counter - 2].price
                 self.sell_points.append([self.time_counter - 1, self.sell_price])
                 self.networth += self.sell_price * self.amount#base price
                 self.networth_points.append([self.time_counter -1, self.networth])
@@ -451,7 +451,8 @@ class tcn_agent(agent_thread):
         y_hat = self.m.predict(x)
         print("Predicting next price to be: ", y_hat[0][0])
         print("Real next price was: ", y)
-        if ((y-x[0][-1][0]) * (y_hat[0][0]-x[0][-1][0]) > 0): #checks if agent guessed right on opening going up or down
+        #if ((y-x[0][-1][0]) * (y_hat[0][0]-x[0][-1][0]) > 0): #use if scaler
+        if (y * y_hat[0][0] > 0): #Use if percentile
             self.correct_guess +=1
         y_normal = 0
         if self.percentage != []:
@@ -490,5 +491,5 @@ class tcn_agent(agent_thread):
     def set_exit(self, value=True):
         # used to exit this agent thread
         self.exit = value
-        print("Sergei's networth: ", self.sergei)
+        #print("Sergei's networth: ", self.sergei) #If using sergei's algorithm
         print("Networth: ", self.networth)
