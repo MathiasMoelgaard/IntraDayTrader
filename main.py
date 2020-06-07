@@ -3,6 +3,7 @@ from trade_platform.src.agent.simple_agent import simple_agent
 from trade_platform.src.agent.agent_thread import agent_thread
 from trade_platform.src.trade_platform.trade_platform import trade_platform
 from tcn_modeling import tcn
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     #t = trade_platform(length=5000, data_path=r'data\US1.ATVI_200505_200507.txt', enable_plot=False,random=False, type = "minute")
@@ -13,10 +14,22 @@ if __name__ == "__main__":
     # t.add_agent(trained_agent)
     # t.start()
 
-    tcn = tcn(data_path=r'data\US1.ABT_190504_200519.txt', moments = 12);
-    tcn.train()
-    tcn.test_set(data_path = r'data\US1.ABT_test_small.txt')
-    tcn.test()
+    tcn = tcn(data_path=r'data\US1.ABT_190504_200519.txt', loadModel = r'moments_12+batch_sizeNone.h5', moments = 12);
+    # tcn.train()
+    tcn.test_set(data_path = r'data\US1.ATVI_200505_200507.txt')
+    #tcn.test()
+    predict, actual = tcn.predict()
+
+    #graphs predicted percentage change over 100 days
+    predict = 10** predict
+    actual = 10** actual
+    for i in range(len(predict) - 1):
+        predict[i+1] = predict[i+1] * predict[i]
+        actual[i+1] = actual[i+1] * actual[i]
+    plt.plot(predict, c = "blue", label = "predicted")
+    plt.plot(actual, c = "red", label = "actual")
+
+    plt.show()
 
 
 
