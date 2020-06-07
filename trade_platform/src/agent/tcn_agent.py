@@ -66,7 +66,9 @@ class tcn_agent(agent_thread):
     #t.start()
     #Can change perameters, just need to set trainset to 0 when running on another dataset
 
-    def __init__(self, moments = 17, batch_size = None, input_dim = 6, model = '1', trainset = 100, arima = True, loadModel = False):
+    def __init__(self, moments = 17, batch_size = None, input_dim = 6, model = '1', trainset = 100, arima = True, loadModel = False, reproduceable = False):
+        if reproduceable:
+            npy.random.seed(2020)
         agent_thread.__init__(self)
         self.moments = moments #Number of moments looked back to decide next value
         self.holding_time = 0
@@ -82,6 +84,12 @@ class tcn_agent(agent_thread):
             self.m.compile(optimizer='adam', loss='mse')
             if model == '1':
                 self.save = ModelCheckpoint('./model1.h5', save_best_only=True, monitor='val_loss', mode='min')
+            elif model == '2':
+                self.save = ModelCheckpoint('./model2.h5', save_best_only=True, monitor='val_loss', mode='min')
+            elif model == '3':
+                self.save = ModelCheckpoint('./model3.h5', save_best_only=True, monitor='val_loss', mode='min')
+            elif model == '4':
+                self.save = ModelCheckpoint('./model4.h5', save_best_only=True, monitor='val_loss', mode='min')
         else:
             self.model(model) #Compile model
         self.training = True
