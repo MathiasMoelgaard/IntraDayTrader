@@ -244,7 +244,7 @@ class tcn_agent(agent_thread):
             self.save = ModelCheckpoint('./model4.h5', save_best_only=True, monitor='val_loss', mode='min')
         self.m = Model(inputs=i, outputs=o)
         self.m.compile(optimizer='adam', loss=custom_loss) #optimizer and loss can be changed to what we want
-        self.stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
+        self.stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
         #########################################################################
 
     def arima_feature(self, i):
@@ -274,10 +274,8 @@ class tcn_agent(agent_thread):
         last21 = [i.price for i in last21]
         malast7 = np.mean(last7)
         malast21 = np.mean(last21)
-        #explast7 = pd.ewm(last7)
-        #explast21 = pd.ewm(last21)
 
-        return malast7, malast21#, explast7, explast21)
+        return malast7, malast21
 
     def get_technical_indicators_(self, i, input):
         if len(input) >= 8 and i >= 8:
@@ -366,7 +364,7 @@ class tcn_agent(agent_thread):
                             inner_data.append(np.log(value/data_pt[0]))
                     else:
                         if (j < 1):
-                            inner_data.append(np.log(value / data[i - 1][1]))
+                            inner_data.append(np.log(value / data[i - 1][0]))
                         else:
                             inner_data.append(np.log(value/ (data[i - 1][0])))
                 normalized_data.append(inner_data)
