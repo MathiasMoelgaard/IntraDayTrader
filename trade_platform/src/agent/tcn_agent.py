@@ -121,8 +121,8 @@ class tcn_agent(agent_thread):
             self.train()
         if len(self.market_history) > self.training_data + offset + self.moments:
             predicted_value, real_current_value = self.run_model()
-            print("Correct guess chance is: ", self.correct_guess*100/(self.time_counter - self.training_data - offset), "%")
-            if not self.holding and predicted_value[0] > real_current_value[0]:#(predicted_value[0] > 0 and predicted_value[1] > 0):
+            print("Correct guess chance is: ", self.correct_guess*100/(self.time_counter - self.training_data - offset - self.moments), "%")
+            if not self.holding and predicted_value[0] > 0: #Change to real_current_value[0] if using scaler
                 self.amount = 100 #amount to buy is set to fix for now but can be changed
                 #self.amount = 1000 * (predicted_value[0] - real_current_value[0]) use this for varing amount or make your own
                 if self.amount < 0:
@@ -133,31 +133,31 @@ class tcn_agent(agent_thread):
                 ###Sergei's algorithm
                 # looking at self.time_counter-2 so we can check the real value while guessing the real value
                 # as well as be able to use high and low of current market point for Sergei's algorithm
-                if (self.market_history[self.time_counter - 3].close >= self.market_history[self.time_counter - 3].open
-                        and self.market_history[self.time_counter - 2].close <= self.market_history[self.time_counter - 2].open
-                        and (self.market_history[self.time_counter - 3].high >= self.market_history[self.time_counter - 1].low
-                        and self.market_history[self.time_counter - 3].high <= self.market_history[self.time_counter - 1].high)):
-                    self.buy_in_price = self.market_history[self.time_counter - 3].high
-                    print("Used Sergei's algorithm and gained/lost ", self.market_history[self.time_counter - 2].price - self.buy_in_price, " per share")
-                    self.sergei += (self.market_history[self.time_counter - 2].price - self.buy_in_price) * self.amount
-                else:
-                    self.buy_in_price = self.market_history[self.time_counter - 2].price #base price
+                #if (self.market_history[self.time_counter - 3].close >= self.market_history[self.time_counter - 3].open
+                #        and self.market_history[self.time_counter - 2].close <= self.market_history[self.time_counter - 2].open
+                #        and (self.market_history[self.time_counter - 3].high >= self.market_history[self.time_counter - 1].low
+                #        and self.market_history[self.time_counter - 3].high <= self.market_history[self.time_counter - 1].high)):
+                #    self.buy_in_price = self.market_history[self.time_counter - 3].high
+                #    print("Used Sergei's algorithm and gained/lost ", self.market_history[self.time_counter - 2].price - self.buy_in_price, " per share")
+                #    self.sergei += (self.market_history[self.time_counter - 2].price - self.buy_in_price) * self.amount
+                #else:
+                self.buy_in_price = self.market_history[self.time_counter - 2].price #base price
                 #print(self.buy_in_price)
                 self.buy_points.append([self.time_counter-1, self.buy_in_price])
                 self.networth -= self.buy_in_price * self.amount
                 print("buy  at time " + str(self.time_counter) + "\t price : " + str(self.buy_in_price))
-            elif self.holding and predicted_value[0] < real_current_value[0]:#(predicted_value[0] < 0 or predicted_value[1] < 0):
+            elif self.holding and predicted_value[0] < 0:#Change to real_current_value[0] if using scaler
                 self.act = action.SELL
                 ###Sergei's algorithm
-                if (self.market_history[self.time_counter - 3].close <= self.market_history[self.time_counter - 3].open
-                        and self.market_history[self.time_counter - 2].close >= self.market_history[self.time_counter - 2].open
-                        and (self.market_history[self.time_counter - 3].low >= self.market_history[self.time_counter - 1].low
-                        and self.market_history[self.time_counter - 3].low <= self.market_history[self.time_counter - 1].high)):
-                    self.sell_price = self.market_history[self.time_counter - 3].low
-                    print("Used Sergei's algorithm and gained/lost ", self.buy_in_price - self.market_history[self.time_counter - 2].price, " per share")
-                    self.sergei += (self.buy_in_price - self.market_history[self.time_counter - 2].price) * self.amount
-                else:
-                    self.sell_price = self.market_history[self.time_counter - 2].price
+                #if (self.market_history[self.time_counter - 3].close <= self.market_history[self.time_counter - 3].open
+                #        and self.market_history[self.time_counter - 2].close >= self.market_history[self.time_counter - 2].open
+                #        and (self.market_history[self.time_counter - 3].low >= self.market_history[self.time_counter - 1].low
+                #        and self.market_history[self.time_counter - 3].low <= self.market_history[self.time_counter - 1].high)):
+                #    self.sell_price = self.market_history[self.time_counter - 3].low
+                #    print("Used Sergei's algorithm and gained/lost ", self.buy_in_price - self.market_history[self.time_counter - 2].price, " per share")
+                #    self.sergei += (self.buy_in_price - self.market_history[self.time_counter - 2].price) * self.amount
+                #else:
+                self.sell_price = self.market_history[self.time_counter - 2].price
                 self.sell_points.append([self.time_counter - 1, self.sell_price])
                 self.networth += self.sell_price * self.amount#base price
                 self.networth_points.append([self.time_counter -1, self.networth])
@@ -217,7 +217,7 @@ class tcn_agent(agent_thread):
             x2 = LSTM(5, return_sequences=False, dropout=.3)(x2)
             x = add([x1, x2])
             o = Dense(1, activation='linear')(x)
-            self.save = ModelCheckpoint('./model2.h5', save_best_only=True, monitor='val_accuracy', mode='max')
+            self.save = ModelCheckpoint('./model2.h5', save_best_only=True, monitor='val_loss', mode='min')
 
         elif model == '3':
             #Complex model to test and change, probably poorer results due to overtraining
@@ -244,9 +244,7 @@ class tcn_agent(agent_thread):
             o = Dense(1, activation='linear')(o)
             self.save = ModelCheckpoint('./model4.h5', save_best_only=True, monitor='val_loss', mode='min')
         self.m = Model(inputs=i, outputs=o)
-        self.m.summary();
-        # return;
-        self.m.compile(optimizer='adam', loss='mse') #optimizer and loss can be changed to what we want
+        self.m.compile(optimizer='adam', loss=custom_loss) #optimizer and loss can be changed to what we want
         self.stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
         #########################################################################
 
@@ -277,10 +275,8 @@ class tcn_agent(agent_thread):
         last21 = [i.price for i in last21]
         malast7 = np.mean(last7)
         malast21 = np.mean(last21)
-        #explast7 = pd.ewm(last7)
-        #explast21 = pd.ewm(last21)
 
-        return malast7, malast21#, explast7, explast21)
+        return malast7, malast21
 
     def get_technical_indicators_(self, i, input):
         if len(input) >= 8 and i >= 8:
@@ -312,7 +308,7 @@ class tcn_agent(agent_thread):
         x = np.array([])
         y = np.array([])
         #Normalize data
-        input = self.normalization(input, 'default')
+        input = self.normalization(input, 'custom')
         for i in range(input.shape[0] - moments+1):
             x_values = np.array(input[i:moments + i - lookahead])
             y_values = np.array(input[i+moments-lookahead:i+moments][0][0])
@@ -369,7 +365,7 @@ class tcn_agent(agent_thread):
                             inner_data.append(np.log(value/data_pt[0]))
                     else:
                         if (j < 1):
-                            inner_data.append(np.log(value / data[i - 1][1]))
+                            inner_data.append(np.log(value / data[i - 1][0]))
                         else:
                             inner_data.append(np.log(value/ (data[i - 1][0])))
                 normalized_data.append(inner_data)
@@ -409,6 +405,7 @@ class tcn_agent(agent_thread):
                 self.features.append(input[i])
 
     def prepare_data_(self, input):
+        self.train_dif = len(input)
         difference = len(self.features) - len(input)
         if self.arima_on:
             difference +=50
@@ -453,7 +450,8 @@ class tcn_agent(agent_thread):
         y_hat = self.m.predict(x)
         print("Predicting next price to be: ", y_hat[0][0])
         print("Real next price was: ", y)
-        if ((y-x[0][-1][0]) * (y_hat[0][0]-x[0][-1][0]) > 0): #checks if agent guessed right on opening going up or down
+        #if ((y-x[0][-1][0]) * (y_hat[0][0]-x[0][-1][0]) > 0): #use if scaler
+        if (y * y_hat[0][0] > 0): #Use if percentile
             self.correct_guess +=1
         y_normal = 0
         if self.percentage != []:
@@ -492,5 +490,5 @@ class tcn_agent(agent_thread):
     def set_exit(self, value=True):
         # used to exit this agent thread
         self.exit = value
-        print("Sergei's networth: ", self.sergei)
+        #print("Sergei's networth: ", self.sergei) #If using sergei's algorithm
         print("Networth: ", self.networth)
