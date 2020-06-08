@@ -16,6 +16,20 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 from tcn import TCN
 
+def wave_net_activation(x): #https://www.kaggle.com/christofhenkel/temporal-cnn
+    # type: (Layer) -> Layer
+    """This method defines the activation used for WaveNet
+    described in https://deepmind.com/blog/wavenet-generative-model-raw-audio/
+    Args:
+        x: The layer we want to apply the activation to
+    Returns:
+        A new layer with the wavenet activation applied
+    """
+    tanh_out = Activation('tanh')(x)
+    sigm_out = Activation('sigmoid')(x)
+    return multiply([tanh_out, sigm_out])
+
+
 class tcn():
 
     def __init__(self, moments, model = 1, data_path = None, batch_size = None, input_dims = 6, trainset = 100, loadModel = None, reporducability = False):
@@ -34,20 +48,20 @@ class tcn():
             '''make the model here'''
             i = Input(batch_shape=(self.batch_size, self.moments, 4))
             if model == 1:
-                x1 = TCN(return_sequences=False, nb_filters=(self.moments)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.3,
+                x1 = TCN(return_sequences=False, nb_filters=(self.moments)*2, dilations=[2**i for i in range(int(np.log2(moments)))], nb_stacks=2, dropout_rate=.3,
                          kernel_size=2)(i)
                 x2 = Lambda(lambda z: backend.reverse(z, axes=-1))(i)
-                x2 = TCN(return_sequences=False, nb_filters=(self.moments)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.1,
+                x2 = TCN(return_sequences=False, nb_filters=(self.moments)*2, dilations=[2**i for i in range(int(np.log2(moments)))], nb_stacks=2, dropout_rate=.1,
                          kernel_size=2)(x2)
                 x = add([x1, x2])
                 o = Dense(1, activation='linear')(x)
 
             elif model == 2:
-                x1 = TCN(return_sequences=True, nb_filters=(self.moments) * 2, dilations=[1, 2, 4], nb_stacks=2,
+                x1 = TCN(return_sequences=True, nb_filters=(self.moments) * 2, dilations=[2**i for i in range(int(np.log2(moments)))], nb_stacks=2,
                      dropout_rate=.3,
                      kernel_size=2)(i)
                 x2 = Lambda(lambda z: backend.reverse(z, axes=-1))(i)
-                x2 = TCN(return_sequences=True, nb_filters=(self.moments) * 2, dilations=[1, 2, 4], nb_stacks=2,
+                x2 = TCN(return_sequences=True, nb_filters=(self.moments) * 2, dilations=[2**i for i in range(int(np.log2(moments)))], nb_stacks=2,
                          dropout_rate=.1,
                          kernel_size=2)(x2)
                 x = add([x1, x2])
@@ -58,9 +72,10 @@ class tcn():
                 o = Dense(1, activation='linear')(x)
 
             elif model == 3:
-                x = TCN(return_sequences=True, nb_filters=32, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.3,
+                # print([2**i for i in range(int(np.log2(moments) - 1))])
+                x = TCN(return_sequences=True, nb_filters=32, dilations=[2**i for i in range(int(np.log2(moments)))], nb_stacks=2, dropout_rate=.3,
                      kernel_size=4)(i)
-                x1 = TCN(return_sequences=True, nb_filters = 16, dilations = [1, 2, 4, 8], nb_stacks = 2, dropout_rate=.3, kernel_size=4)(x)
+                x1 = TCN(return_sequences=True, nb_filters = 16, dilations = [2**i for i in range(int(np.log2(moments)))], nb_stacks = 2, dropout_rate=.3, kernel_size=4)(x)
                 x2 = LSTM(32, return_sequences=True, dropout=.3)(i)
                 x2 = LSTM(16, return_sequences=True, dropout=.3)(x2)
                 x = add([x1, x2])
@@ -73,7 +88,7 @@ class tcn():
             self.m = Model(inputs=i, outputs=o)
 
         else:
-            self.m = load_model(loadModel, custom_objects = {'TCN': TCN})
+            self.m = load_model(loadModel, custom_objects = {'TCN': TCN, 'wave_net_activation': wave_net_activation})
 
         self.m.summary();
         self.m.compile(optimizer='adam', loss='mse')
