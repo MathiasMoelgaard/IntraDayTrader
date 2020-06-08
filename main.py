@@ -6,36 +6,36 @@ from tcn_modeling import tcn
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    #t = trade_platform(length=5000, data_path=r'data\US1.ATVI_200505_200507.txt', enable_plot=False,random=False, type = "minute")
+    t = trade_platform(length=5000, data_path="data/US1.ABT_190504_200519.txt", enable_plot=False,random=False, type = "minute")
     # when inport csv or other data file, be sure to remove the headers.
 
-    # trained_agent = tcn_agent(trainset = 0, arima = False, model='1', moments=17)#, loadModel = 'model1custom.h5'
+    trained_agent = tcn_agent(trainset = 100, arima = False, model='1', moments=65)#, loadModel = 'model1custom.h5'
     # # trained_agent.train('data/US1.ABT_small_training.txt')
-    # t.add_agent(trained_agent)
-    # t.start()
-    for moments in [15,30,45]:
-        Tcn = tcn(model = 2, data_path=r'data\US1.ABT_190504_200519.txt', moments = moments);
-        Tcn.train()
+    t.add_agent(trained_agent)
+    t.start()
+    #for moments in [15,30,45]:
+    #    Tcn = tcn(model = 2, data_path=r'data\US1.ABT_190504_200519.txt', moments = moments);
+    #    Tcn.train()
 
-        Tcn.test_set(data_path = r'data\US1.ABT_test.txt')
+    #    Tcn.test_set(data_path = r'data\US1.ABT_test.txt')
         #tcn.test()
-        predict, actual = Tcn.predict()
+    #    predict, actual = Tcn.predict()
 
         #graphs predicted percentage change over 100 minutes
-        for j in [100,500,1000]:
-            predict1 = 10** predict[:j]
-            actual1 = 10** actual[:j]
-            for i in range(j - 1):
-                    predict1[i+1] = predict1[i+1] * predict1[i]
-                    actual1[i+1] = actual1[i+1] * actual1[i]
+    #    for j in [100,500,1000]:
+    #        predict1 = 10** predict[:j]
+    #        actual1 = 10** actual[:j]
+    #        for i in range(j - 1):
+    #                predict1[i+1] = predict1[i+1] * predict1[i]
+    #                actual1[i+1] = actual1[i+1] * actual1[i]
 
-            plt.plot(predict1, c = "blue", label = "predicted")
-            plt.plot(actual1, c = "red", label = "actual")
+    #        plt.plot(predict1, c = "blue", label = "predicted")
+    #        plt.plot(actual1, c = "red", label = "actual")
 
                 # fname = f'moments_{moments}+{i}minute_predict-vs-actual'
                 # plt.savefig(fname)
-            plt.show()
-            plt.clf()
+    #        plt.show()
+    #        plt.clf()
 
 
 

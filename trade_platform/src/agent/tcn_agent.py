@@ -194,21 +194,21 @@ class tcn_agent(agent_thread):
             #the first 1750 data points for training and arima set to true. Recieved a 58% accuracy over 200 data points
             #and increased networth, slight loss of income due to sergei's algoritm
             #Can try with activation = wave_net_activation
-            x1 = TCN(return_sequences=False, nb_filters=(self.moments-1)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.3,
+            x1 = TCN(return_sequences=False, nb_filters=(self.moments-1)*2, dilations=[1, 2, 4, 8, 16], nb_stacks=2, dropout_rate=.3,
                      kernel_size=2)(i)
             x2 = Lambda(lambda z: backend.reverse(z, axes=-1))(i)
-            x2 = TCN(return_sequences=False, nb_filters=(self.moments-1)*2, dilations=[1, 2, 4, 8], nb_stacks=2, dropout_rate=.1,
+            x2 = TCN(return_sequences=False, nb_filters=(self.moments-1)*2, dilations=[1, 2, 4, 8, 16], nb_stacks=2, dropout_rate=.1,
                      kernel_size=2)(x2)
             x = add([x1, x2])
             o = Dense(1, activation='linear')(x)
             self.save = ModelCheckpoint('./model1.h5', save_best_only=False, monitor='val_loss', mode='min')
 
         elif model == '2':
-            x1 = TCN(return_sequences=True, nb_filters=(self.moments - 1) * 2, dilations=[1, 2, 4], nb_stacks=2,
+            x1 = TCN(return_sequences=True, nb_filters=(self.moments - 1) * 2, dilations=[1, 2, 4, 8, 16], nb_stacks=2,
                      dropout_rate=.3,
                      kernel_size=2)(i)
             x2 = Lambda(lambda z: backend.reverse(z, axes=-1))(i)
-            x2 = TCN(return_sequences=True, nb_filters=(self.moments - 1) * 2, dilations=[1, 2, 4], nb_stacks=2,
+            x2 = TCN(return_sequences=True, nb_filters=(self.moments - 1) * 2, dilations=[1, 2, 4, 8, 16], nb_stacks=2,
                      dropout_rate=.1,
                      kernel_size=2)(x2)
             x = add([x1, x2])
@@ -217,7 +217,7 @@ class tcn_agent(agent_thread):
             x2 = LSTM(5, return_sequences=False, dropout=.3)(x2)
             x = add([x1, x2])
             o = Dense(1, activation='linear')(x)
-            self.save = ModelCheckpoint('./model2.h5', save_best_only=True, monitor='val_accuracy', mode='max')
+            self.save = ModelCheckpoint('./model2_moment_64.h5', save_best_only=True, monitor='val_accuracy', mode='max')
 
         elif model == '3':
             #Complex model to test and change, probably poorer results due to overtraining
