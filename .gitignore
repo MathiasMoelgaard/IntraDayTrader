@@ -1,4 +1,4 @@
 __pycache__
 .idea
 *.pyc
-trade_platofrm/src/agent/__pycache__/*.pyc
+trade_platofrm/src/agent/__pycache__
