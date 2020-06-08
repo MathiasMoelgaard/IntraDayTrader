@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # Tcn.train()
 
     """Test set for the model is inputed here"""
-    Tcn.test_set(data_path = r'data\US1.ABT_test.txt')
+    Tcn.test_set(data_path = r'data\US1.ABT_test_data.txt')
         #tcn.test()
 
     """The prediction and expected results are computed inside of the TCN object"""
