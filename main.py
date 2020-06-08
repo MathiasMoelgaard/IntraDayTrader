@@ -6,7 +6,7 @@ from tcn_modeling import tcn
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    #t = trade_platform(length=5000, data_path=r'data\US1.ATVI_200505_200507.txt', enable_plot=False,random=False, type = "minute")
+    #t = trade_platform(length=5000, data_path=r'data/US1.ATVI_200505_200507.txt', enable_plot=False,random=False, type = "minute")
     # when inport csv or other data file, be sure to remove the headers.
 
     # trained_agent = tcn_agent(trainset = 0, arima = False, model='1', moments=17)#, loadModel = 'model1custom.h5'
@@ -27,12 +27,12 @@ if __name__ == "__main__":
     with the given moments
     data path is for the training data set
     """
-    Tcn = tcn(loadModel = model[0], data_path=r'data\US1.ABT_training_data.txt', moments = model[1]);
+    Tcn = tcn(loadModel = model[0], data_path=r'data/US1.ABT_training_data.txt', moments = model[1]);
     # if more training is wanted
     # Tcn.train()
 
     """Test set for the model is inputed here"""
-    Tcn.test_set(data_path = r'data\US1.ABT_test_data_short.txt')
+    Tcn.test_set(data_path = r'data/US1.ABT_test_data_short.txt')
         #tcn.test()
 
     """The prediction and expected results are computed inside of the TCN object"""
