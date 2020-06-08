@@ -2,12 +2,17 @@
 # CS-175-Project
 UCI CS 175 Project
 
+
+# CS-175-Project
+UCI CS 175 Project\
+This file is the same as README.MD
+
 This version is for *Submission*\
 This version is tested on: Ubuntu 16.04, Windows
 \
 
 We put up a test with according data. Use `python3 main.py`\
-This test used a saved model.
+This test used a saved model.It use 30-moment predictions over 1000 minutes of test data, the same as Figure 4 in the report.
 
 modules and environments needed:
 
