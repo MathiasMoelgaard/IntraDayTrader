@@ -2,9 +2,12 @@
 # CS-175-Project
 UCI CS 175 Project
 
-This version is for *Submission*
+This version is for *Submission*\
+This version is tested on: Ubuntu 16.04, Windows
+\
 
-We put up a test with according data. Use `python3 main.py`
+We put up a test with according data. Use `python3 main.py`\
+This test used a saved model.
 
 modules and environments needed:
 
