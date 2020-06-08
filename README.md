@@ -1,15 +1,19 @@
 # CS-175-Project
 UCI CS 175 Project 
 
-Recommend using the Trade platform as submodule, so that maintaining Trade platform would be easier.  https://github.com/yubinsun/CS175-Trade-Platform
+This version is for *Submission*
 
-Use below to include all submodules 
+We put up a test with according data. Use python3 main.py
 
-git clone --recurse-submodules git@github.com:yubinsun/CS-175-Project.git
+modules and environments needed:
 
-OR 
+Keras\
+keras-tcn\
+pandas\
+numpy\
+statsmodels\
+tensorflow\
+sklearn\
+matplotlib\
 
-git clone git@github.com:yubinsun/CS-175-Project.git
-
-git submodule update --recursive
- 
+and maybe other environement
