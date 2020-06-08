@@ -13,29 +13,32 @@ if __name__ == "__main__":
     # # trained_agent.train('data/US1.ABT_small_training.txt')
     # t.add_agent(trained_agent)
     # t.start()
-    for moments in [15,30,45]:
-        Tcn = tcn(model = 2, data_path=r'data\US1.ABT_190504_200519.txt', moments = moments);
-        Tcn.train()
+    models = {r'model_2+moments_15+batch_sizeNone.h5': 15,
+              r'model_2+moments_30+batch_sizeNone.h5': 30,
+              r'model_2+moments_45+batch_sizeNone.h5': 45}
+    for key in models:
+        Tcn = tcn(loadModel = key, data_path=r'data\US1.ABT_190504_200519.txt', moments = models[key]);
+        # Tcn.train()
 
-        Tcn.test_set(data_path = r'data\US1.ABT_test.txt')
+        Tcn.test_set(data_path = r'data\US1.ATVI_200505_200507.txt')
         #tcn.test()
         predict, actual = Tcn.predict()
 
         #graphs predicted percentage change over 100 minutes
-        for j in [100,500,1000]:
-            predict1 = 10** predict[:j]
-            actual1 = 10** actual[:j]
-            for i in range(j - 1):
+        # for j in [100,500,1000]:
+        predict1 = 10** predict
+        actual1 = 10** actual
+        for i in range(len(predict1) - 1):
                     predict1[i+1] = predict1[i+1] * predict1[i]
                     actual1[i+1] = actual1[i+1] * actual1[i]
 
-            plt.plot(predict1, c = "blue", label = "predicted")
-            plt.plot(actual1, c = "red", label = "actual")
+        plt.plot(predict1, c = "blue", label = "predicted")
+        plt.plot(actual1, c = "red", label = "actual")
 
                 # fname = f'moments_{moments}+{i}minute_predict-vs-actual'
                 # plt.savefig(fname)
-            plt.show()
-            plt.clf()
+        plt.show()
+        plt.clf()
 
 
 
