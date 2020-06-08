@@ -6,13 +6,13 @@ from tcn_modeling import tcn
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    #t = trade_platform(length=5000, data_path=r'data/US1.ATVI_200505_200507.txt', enable_plot=False,random=False, type = "minute")
+    t = trade_platform(length=5000, data_path=r'data/US1.ATVI_200505_200507.txt', enable_plot=False,random=False, type = "minute")
     # when inport csv or other data file, be sure to remove the headers.
 
-    # trained_agent = tcn_agent(trainset = 0, arima = False, model='1', moments=17)#, loadModel = 'model1custom.h5'
+    trained_agent = tcn_agent(trainset = 200, arima = False, model='1', moments=17)#, loadModel = 'model1custom.h5'
     # # trained_agent.train('data/US1.ABT_small_training.txt')
-    # t.add_agent(trained_agent)
-    # t.start()
+    t.add_agent(trained_agent)
+    t.start()
 
     '''
     Pathway for to load up the model
@@ -20,38 +20,38 @@ if __name__ == "__main__":
     archetecture one is in format model_1+moments_{moments}+batch_sizeNone.h5
     archetecture two is in format model_2+moments_{moments}+batch_sizeNone.h5
     '''
-    model = (r'model_1+moments_30+batch_sizeNone.h5', 30)
+    #model = (r'model_1+moments_30+batch_sizeNone.h5', 30)
 
     """
     Load the model into the TCN
     with the given moments
     data path is for the training data set
     """
-    Tcn = tcn(loadModel = model[0], data_path=r'data/US1.ABT_training_data.txt', moments = model[1]);
+    #Tcn = tcn(loadModel = model[0], data_path=r'data/US1.ABT_training_data.txt', moments = model[1]);
     # if more training is wanted
     # Tcn.train()
 
     """Test set for the model is inputed here"""
-    Tcn.test_set(data_path = r'data/US1.ABT_test_data_short.txt')
+    #Tcn.test_set(data_path = r'data/US1.ABT_test_data_short.txt')
         #tcn.test()
 
     """The prediction and expected results are computed inside of the TCN object"""
-    predict, actual = Tcn.predict()
+    #predict, actual = Tcn.predict()
 
     #graphs predicted percentage change over 100 minutes
-    predict1 = 10** predict # raise 10 to said power to get perdicted % change
-    actual1 = 10** actual
-    for i in range(len(predict1) - 1):
-        predict1[i+1] = predict1[i+1] * predict1[i] # multiply to get net percent change
-        actual1[i+1] = actual1[i+1] * actual1[i]
+    #predict1 = 10** predict # raise 10 to said power to get perdicted % change
+    #actual1 = 10** actual
+    #for i in range(len(predict1) - 1):
+    #    predict1[i+1] = predict1[i+1] * predict1[i] # multiply to get net percent change
+    #    actual1[i+1] = actual1[i+1] * actual1[i]
 
-    plt.plot(predict1, c = "blue", label = "predicted")
-    plt.plot(actual1, c = "red", label = "actual")
+    #plt.plot(predict1, c = "blue", label = "predicted")
+    #plt.plot(actual1, c = "red", label = "actual")
 
                     # fname = f'moments_{moments}+{i}minute_predict-vs-actual'
                     # plt.savefig(fname)
-    plt.show()
-    plt.clf()
+    #plt.show()
+    #plt.clf()
 
 
 

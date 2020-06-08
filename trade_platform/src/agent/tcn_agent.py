@@ -34,15 +34,15 @@ def wave_net_activation(x): #https://www.kaggle.com/christofhenkel/temporal-cnn
 
 '''This was never used '''
 #Loss function for punishing wrong decision of buy or sell and magnitude
-# def custom_loss(y, y_hat):
-#     mask = tf.math.multiply(y, y_hat)
-#     #print(mask)
-#     mask = tf.cast(mask < 0, mask.dtype) * mask
-#     mask = tf.math.abs(mask)
-#     yy = tf.math.multiply(y, mask)
-#     yy_hat = tf.math.multiply(y_hat, mask)
-#     #return backend.mean(backend.square(yy - yy_hat))
-#     return (backend.mean(backend.square(yy - yy_hat)) + backend.mean(backend.square(y - y_hat)))/2
+def custom_loss(y, y_hat):
+     mask = tf.math.multiply(y, y_hat)
+     #print(mask)
+     mask = tf.cast(mask < 0, mask.dtype) * mask
+     mask = tf.math.abs(mask)
+     yy = tf.math.multiply(y, mask)
+     yy_hat = tf.math.multiply(y_hat, mask)
+     #return backend.mean(backend.square(yy - yy_hat))
+     return (backend.mean(backend.square(yy - yy_hat)) + backend.mean(backend.square(y - y_hat)))/2
 
 class tcn_agent(agent_thread):
 
@@ -69,7 +69,7 @@ class tcn_agent(agent_thread):
 
     def __init__(self, moments = 17, batch_size = None, input_dim = 6, model = '1', trainset = 100, arima = True, loadModel = False, reproduceable = False, norm = "custom"):
         if reproduceable:
-            npy.random.seed(2020)
+            np.random.seed(2020)
         agent_thread.__init__(self)
         self.train_dif = 0
         self.moments = moments #Number of moments looked back to decide next value
