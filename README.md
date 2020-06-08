@@ -1,6 +1,6 @@
 
 # CS-175-Project
-UCI CS 175 Project 
+UCI CS 175 Project
 
 This version is for *Submission*
 
@@ -13,7 +13,7 @@ keras-tcn\
 pandas\
 numpy\
 statsmodels\
-tensorflow\
+tensorflow >= 1.15\
 sklearn\
 matplotlib\
 and maybe other environement

@@ -13,7 +13,7 @@ keras-tcn\
 pandas\
 numpy\
 statsmodels\
-tensorflow\
+tensorflow >= 1.15\
 sklearn\
 matplotlib\
 and maybe other environement
