@@ -14,16 +14,18 @@ if __name__ == "__main__":
     # t.add_agent(trained_agent)
     # t.start()
 
-    '''Pathway for to load up the model
+    '''
+    Pathway for to load up the model
 
-    archetecture one is in format moments_{moments}+batch_sizeNone.h5
+    archetecture one is in format model_1+moments_{moments}+batch_sizeNone.h5
     archetecture two is in format model_2+moments_{moments}+batch_sizeNone.h5
     '''
-    model = (r'moments_30+batch_sizeNone.h5', 30)
+    model = (r'model_1+moments_30+batch_sizeNone.h5', 30)
 
-    """ Load the model into the TCN
-        with the given moments
-        data path is for the training data set
+    """
+    Load the model into the TCN
+    with the given moments
+    data path is for the training data set
     """
     Tcn = tcn(loadModel = model[0], data_path=r'data\US1.ABT_training_data.txt', moments = model[1]);
     # if more training is wanted
@@ -37,8 +39,8 @@ if __name__ == "__main__":
     predict, actual = Tcn.predict()
 
     #graphs predicted percentage change over 100 minutes
-    predict1 = 10** predict[:j] # raise 10 to said power to get perdicted % change
-    actual1 = 10** actual[:j]
+    predict1 = 10** predict # raise 10 to said power to get perdicted % change
+    actual1 = 10** actual
     for i in range(len(predict1) - 1):
         predict1[i+1] = predict1[i+1] * predict1[i] # multiply to get net percent change
         actual1[i+1] = actual1[i+1] * actual1[i]
