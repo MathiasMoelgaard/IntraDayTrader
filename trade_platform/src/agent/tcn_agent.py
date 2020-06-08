@@ -32,16 +32,17 @@ def wave_net_activation(x): #https://www.kaggle.com/christofhenkel/temporal-cnn
     sigm_out = Activation('sigmoid')(x)
     return multiply([tanh_out, sigm_out])
 
+'''This was never used '''
 #Loss function for punishing wrong decision of buy or sell and magnitude
-def custom_loss(y, y_hat):
-    mask = tf.math.multiply(y, y_hat)
-    #print(mask)
-    mask = tf.cast(mask < 0, mask.dtype) * mask
-    mask = tf.math.abs(mask)
-    yy = tf.math.multiply(y, mask)
-    yy_hat = tf.math.multiply(y_hat, mask)
-    #return backend.mean(backend.square(yy - yy_hat))
-    return (backend.mean(backend.square(yy - yy_hat)) + backend.mean(backend.square(y - y_hat)))/2
+# def custom_loss(y, y_hat):
+#     mask = tf.math.multiply(y, y_hat)
+#     #print(mask)
+#     mask = tf.cast(mask < 0, mask.dtype) * mask
+#     mask = tf.math.abs(mask)
+#     yy = tf.math.multiply(y, mask)
+#     yy_hat = tf.math.multiply(y_hat, mask)
+#     #return backend.mean(backend.square(yy - yy_hat))
+#     return (backend.mean(backend.square(yy - yy_hat)) + backend.mean(backend.square(y - y_hat)))/2
 
 class tcn_agent(agent_thread):
 
@@ -80,7 +81,7 @@ class tcn_agent(agent_thread):
             self.input_dim += 1
         self.built = False
         if loadModel:
-            self.m = load_model('./model%s.h5'%model, custom_objects={'TCN': TCN})
+            self.m = load_model(loadModel, custom_objects={'TCN': TCN})
             self.stop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
             self.m.compile(optimizer='adam', loss='mse')
             if model == '1':
