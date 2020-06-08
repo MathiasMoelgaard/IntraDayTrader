@@ -13,31 +13,43 @@ if __name__ == "__main__":
     # # trained_agent.train('data/US1.ABT_small_training.txt')
     # t.add_agent(trained_agent)
     # t.start()
-    models = {r'model_3+moments_30+batch_sizeNone.h5': 30,
-              r'model_3+moments_45+batch_sizeNone.h5': 45}
-    for moments in [15,30,45]:
-        Tcn = tcn(model = 3, data_path=r'data\US1.ABT_190504_200519.txt', moments = moments);
-        Tcn.train()
 
-        Tcn.test_set(data_path = r'data\US1.ABT_test.txt')
+    '''Pathway for to load up the model
+
+    archetecture one is in format moments_{moments}+batch_sizeNone.h5
+    archetecture two is in format model_2+moments_{moments}+batch_sizeNone.h5
+    '''
+    model = (r'moments_30+batch_sizeNone.h5', 30)
+
+    """ Load the model into the TCN
+        with the given moments
+        data path is for the training data set
+    """
+    Tcn = tcn(loadModel = model[0], data_path=r'data\US1.ABT_training_data.txt', moments = model[1]);
+    # if more training is wanted
+    # Tcn.train()
+
+    """Test set for the model is inputed here"""
+    Tcn.test_set(data_path = r'data\US1.ABT_test.txt')
         #tcn.test()
-        predict, actual = Tcn.predict()
 
-        #graphs predicted percentage change over 100 minutes
-        for j in [100,500,1000]:
-            predict1 = 10** predict[:j]
-            actual1 = 10** actual[:j]
-            for i in range(len(predict1) - 1):
-                        predict1[i+1] = predict1[i+1] * predict1[i]
-                        actual1[i+1] = actual1[i+1] * actual1[i]
+    """The prediction and expected results are computed inside of the TCN object"""
+    predict, actual = Tcn.predict()
 
-            plt.plot(predict1, c = "blue", label = "predicted")
-            plt.plot(actual1, c = "red", label = "actual")
+    #graphs predicted percentage change over 100 minutes
+    predict1 = 10** predict[:j] # raise 10 to said power to get perdicted % change
+    actual1 = 10** actual[:j]
+    for i in range(len(predict1) - 1):
+        predict1[i+1] = predict1[i+1] * predict1[i] # multiply to get net percent change
+        actual1[i+1] = actual1[i+1] * actual1[i]
+
+    plt.plot(predict1, c = "blue", label = "predicted")
+    plt.plot(actual1, c = "red", label = "actual")
 
                     # fname = f'moments_{moments}+{i}minute_predict-vs-actual'
                     # plt.savefig(fname)
-            plt.show()
-            plt.clf()
+    plt.show()
+    plt.clf()
 
 
 
